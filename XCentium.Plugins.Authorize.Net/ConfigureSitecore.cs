@@ -11,6 +11,10 @@ namespace XCentium.Plugins.Authorize.Net
 {
     using Microsoft.Extensions.DependencyInjection;
     using Sitecore.Framework.Configuration;
+    using Sitecore.Framework.Pipelines.Definitions.Extensions;
+    using Sitecore.Commerce.Core;
+    using System.Reflection;
+    using Sitecore.Commerce.Plugin.Orders;
 
     /// <summary>
     /// The carts configure sitecore class.
@@ -29,15 +33,12 @@ namespace XCentium.Plugins.Authorize.Net
             services.RegisterAllPipelineBlocks(assembly);
 
             services.Sitecore().Pipelines(config => config
-             .AddPipeline<SamplePipeline, SamplePipeline>(
-                    configure =>
-                        {
-                            configure.Add<SampleBlock>();
-                        })
+             .ConfigurePipeline<ICreateOrderPipeline>(d =>
+             {
+                 d.Add<CreateFederatedPaymentBlock>().Before<CreateOrderBlock>();
+             })
             );
-
-            services
-                .AddScoped<SampleCommand, SampleCommand>();
+            
         }
     }
 }
