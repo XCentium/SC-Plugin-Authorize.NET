@@ -1,12 +1,12 @@
-{
-    "version":  "0.0.1",
-    "description":  "Sitecore Commerce Plugin Sample Class Library",
+﻿{
+    "version":  "1.0.2301",
+    "description":  "A Sample Payments Plugin using Braintree.",
     "copyright":  "Â© 2017 Sitecore Corporation A/S. All rights reserved. SitecoreÂ® is a registered trademark of Sitecore Corporation A/S.",
     "authors":  [
                     "Sitecore"
                 ],
     "packOptions":  {
-                        "summary":  "This package contains a Sample Class Library plugin for the Sitecore Commerce Engine.",
+                        "summary":  "This package contains the Payments plugin for the Sitecore Commerce Engine.",
                         "tags":  [
                                      "Sitecore",
                                      "Commerce",
@@ -22,12 +22,10 @@
                         "projectUrl":  "http://www.sitecore.net/",
                         "licenseUrl":  "http://www.sitecore.net/platform/pricing.aspx"
                     },
-  "dependencies": {
-    "AuthorizeNet": "1.9.3",
-    "Plugin.Sample.Payments.Braintree": "1.0.2301",
-    "Sitecore.Commerce.Core": "1.0.2301",
-    "Sitecore.Commerce.Plugin.Payments": "1.0.2301"
-  },
+    "dependencies":  {
+                         "Braintree":  "3.3.0",
+                         "Sitecore.Commerce.Plugin.Payments":  "1.0.2301"
+                     },
     "frameworks":  {
                        "net452":  {
 
@@ -36,7 +34,7 @@
     "configurations":  {
                            "Release":  {
                                            "buildOptions":  {
-                                                                "compile":  "../Shared/VersionInfo.cs",
+                                                                "compile":  "../../build/VersionInfo.cs",
                                                                 "xmlDoc":  true,
                                                                 "warningsAsErrors":  true,
                                                                 "optimize":  true

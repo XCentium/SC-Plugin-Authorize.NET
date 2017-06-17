@@ -35,7 +35,8 @@ namespace XCentium.Plugins.Authorize.Net
             services.Sitecore().Pipelines(config => config
              .ConfigurePipeline<ICreateOrderPipeline>(d =>
              {
-                 d.Add<CreateFederatedPaymentBlock>().Before<CreateOrderBlock>();
+                 d.Replace<Plugin.Sample.Payments.Braintree.CreateFederatedPaymentBlock, Plugins.Authorize.Net.CreateFederatedPaymentBlock>()
+                    .Before<CreateOrderBlock>();
              })
             );
             

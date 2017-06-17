@@ -9,66 +9,91 @@
     using System;
     using AuthorizeNet.Api.Contracts.V1;
     using AuthorizeNet.Api.Controllers.Bases;
+    using Sitecore.Commerce.Plugin.Orders;
+    using Sitecore.Commerce.Plugin.Payments;
+    using System.Collections.Generic;
+    using System.Linq;
 
-    public class CreateFederatedPaymentBlock : PipelineBlock<ChargeCreditCardArgument, createTransactionResponse, CommercePipelineExecutionContext>
+    [PipelineDisplayName(PaymentsAuthorizeNetConstants.Pipelines.Blocks.CreateFederatedPaymentBlock)]
+    public class CreateFederatedPaymentBlock : PipelineBlock<CartEmailArgument, CartEmailArgument, CommercePipelineExecutionContext>
     {
 
-        public override Task<createTransactionResponse> Run(ChargeCreditCardArgument arg, CommercePipelineExecutionContext context)
+        public override Task<CartEmailArgument> Run(CartEmailArgument arg, CommercePipelineExecutionContext context)
         {
             Condition.Requires(arg).IsNotNull("The argument can not be null");
 
-            var authorizeNetPolicy = new AuthorizeNetPolicy();
-            var apiLoginId = authorizeNetPolicy.ApiLoginId;
-            var transactionKey = authorizeNetPolicy.TransactionKey;
+            var cart = arg.Cart;
 
-            var amount = arg.Amount;
+            if (!cart.HasComponent<FederatedPaymentComponent>())
+            {
+                return Task.FromResult(arg);
+            }
 
+            var payment = cart.GetComponent<FederatedPaymentComponent>();
 
+            if (string.IsNullOrEmpty(payment.PaymentMethodNonce))
+            {
+                context.Abort(context.CommerceContext.AddMessage(
+                    context.GetPolicy<KnownResultCodes>().Error,
+                    "InvalidOrMissingPropertyValue",
+                    new object[] { "PaymentMethodNonce" },
+                    $"Invalid or missing value for property 'PaymentMethodNonce'."), context);
+
+                return Task.FromResult(arg);
+            }       
+            
+            // TODO:  Move this to configuration?
             ApiOperationBase<ANetApiRequest, ANetApiResponse>.RunEnvironment = AuthorizeNet.Environment.SANDBOX;
-
+            
             // define the merchant information (authentication / transaction id)
+            var authorizeNetClientPolicy = new AuthorizeNetClientPolicy();
             ApiOperationBase<ANetApiRequest, ANetApiResponse>.MerchantAuthentication = new merchantAuthenticationType()
             {
-                name = apiLoginId,
+                name = authorizeNetClientPolicy.ApiLoginId,
                 ItemElementName = ItemChoiceType.transactionKey,
-                Item = transactionKey,
+                Item = authorizeNetClientPolicy.TransactionKey,
             };
-
-            var creditCard = new creditCardType
-            {
-                cardNumber = "4111111111111111",
-                expirationDate = "0718",
-                cardCode = "123"
-            };
-
-            var billingAddress = new customerAddressType
-            {
-                firstName = "John",
-                lastName = "Doe",
-                address = "123 My St",
-                city = "OurTown",
-                zip = "98004"
-            };
-
-            //standard api call to retrieve response
-            var paymentType = new paymentType { Item = creditCard };
-
-            // Add line Items
-            var lineItems = new lineItemType[2];
-            lineItems[0] = new lineItemType { itemId = "1", name = "t-shirt", quantity = 2, unitPrice = new Decimal(15.00) };
-            lineItems[1] = new lineItemType { itemId = "2", name = "snowboard", quantity = 1, unitPrice = new Decimal(450.00) };
 
             var transactionRequest = new transactionRequestType
             {
-                transactionType = transactionTypeEnum.authCaptureTransaction.ToString(),    // charge the card
-
-                amount = amount,
-                payment = paymentType,
-                billTo = billingAddress,
-                lineItems = lineItems
+                transactionType = transactionTypeEnum.authCaptureTransaction.ToString(),    // authorize and charge the card
+                amount = payment.Amount.Amount,
+                payment = new paymentType {
+                    Item = new opaqueDataType
+                    {
+                        dataDescriptor = "COMMON.ACCEPT.INAPP.PAYMENT",
+                        dataValue = payment.PaymentMethodNonce
+                    }
+                },
+                billTo = ComponentsHelper.TranslatePartyToAddressRequest(payment.BillingParty, context),
+                lineItems = (from cartLine in cart.Lines
+                             select new lineItemType {
+                                itemId = cartLine.ItemId.Split('|').ElementAt(1),
+                                name = cartLine.Name == null ? cartLine.ItemId.Split('|').ElementAt(1) : cartLine.Name,
+                                description = cartLine.ItemId,  
+                                quantity = cartLine.Quantity,
+                                unitPrice = cartLine.Totals.GrandTotal.Amount })
+                                .ToArray()
             };
-
+            
             var request = new createTransactionRequest { transactionRequest = transactionRequest };
+
+//            var requestXml = @"<createTransactionRequest xmlns=""AnetApi/xml/v1/schema/AnetApiSchema.xsd"">
+//   <merchantAuthentication>
+//     <name>yours</name>
+//     <transactionKey>yours</transactionKey>
+//   </merchantAuthentication>
+//   <transactionRequest>
+//      <transactionType>authCaptureTransaction</transactionType>
+//      <amount>75.00</amount>
+//      <payment>
+//         <opaqueData>
+//            <dataDescriptor>COMMON.ACCEPT.INAPP.PAYMENT</dataDescriptor>
+//            <dataValue>nonce_here</dataValue >
+//         </opaqueData>
+//      </payment>
+//   </transactionRequest>
+//</createTransactionRequest>
 
             // instantiate the contoller that will call the service
             var controller = new createTransactionController(request);
@@ -117,10 +142,14 @@
             }
             else
             {
+                foreach(var result in controller.GetResults())
+                {
+                    Debug.WriteLine(result);
+                }
                 Debug.WriteLine("Null Response.");
             }
 
-            return Task.FromResult(response);
+            return Task.FromResult(arg);
             
         }
     }

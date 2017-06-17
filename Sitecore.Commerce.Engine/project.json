@@ -36,10 +36,13 @@
     "Microsoft.Extensions.Logging": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Filter": "1.0.0",
+    "Plugin.Sample.Habitat": "1.0.2301",
+    "Plugin.Sample.Payments.Braintree": "1.0.2301",
     "Serilog": "2.3.0",
     "Serilog.Extensions.Logging": "1.2.0",
     "Serilog.Sinks.Literate": "2.0.0",
     "Serilog.Sinks.RollingFile": "3.2.0",
+    "Sitecore.Commerce.Plugin.AdventureWorks": "1.0.2301",
     "Sitecore.Commerce.Provider.FileSystem": "1.0.2301",
     "XCentium.Plugins.Authorize.Net": "0.0.1"
   },

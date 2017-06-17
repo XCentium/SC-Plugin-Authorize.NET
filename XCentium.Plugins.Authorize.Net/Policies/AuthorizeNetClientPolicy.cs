@@ -2,9 +2,9 @@
 {
     using Sitecore.Commerce.Core;
 
-    public class AuthorizeNetPolicy : Policy
+    public class AuthorizeNetClientPolicy : Policy
     {
-        public AuthorizeNetPolicy()
+        public AuthorizeNetClientPolicy()
         {
             this.ApiLoginId = "87mzarLWY9T";
             this.TransactionKey = "352VhB2g322rK7aY";
