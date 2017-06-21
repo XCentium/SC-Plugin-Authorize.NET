@@ -45,6 +45,7 @@
             // TODO:  Move this to configuration?
             ApiOperationBase<ANetApiRequest, ANetApiResponse>.RunEnvironment = AuthorizeNet.Environment.SANDBOX;
             
+            // TODO:  Move to GetMerchantAuthenticationBlock?
             // define the merchant information (authentication / transaction id)
             var authorizeNetClientPolicy = new AuthorizeNetClientPolicy();
             ApiOperationBase<ANetApiRequest, ANetApiResponse>.MerchantAuthentication = new merchantAuthenticationType()
@@ -78,23 +79,6 @@
             
             var request = new createTransactionRequest { transactionRequest = transactionRequest };
 
-//            var requestXml = @"<createTransactionRequest xmlns=""AnetApi/xml/v1/schema/AnetApiSchema.xsd"">
-//   <merchantAuthentication>
-//     <name>yours</name>
-//     <transactionKey>yours</transactionKey>
-//   </merchantAuthentication>
-//   <transactionRequest>
-//      <transactionType>authCaptureTransaction</transactionType>
-//      <amount>75.00</amount>
-//      <payment>
-//         <opaqueData>
-//            <dataDescriptor>COMMON.ACCEPT.INAPP.PAYMENT</dataDescriptor>
-//            <dataValue>nonce_here</dataValue >
-//         </opaqueData>
-//      </payment>
-//   </transactionRequest>
-//</createTransactionRequest>
-
             // instantiate the contoller that will call the service
             var controller = new createTransactionController(request);
             controller.Execute();
@@ -109,11 +93,16 @@
                 {
                     if (response.transactionResponse.messages != null)
                     {
+                        payment.TransactionId = response.transactionResponse.transId;
+                        payment.TransactionStatus = response.transactionResponse.responseCode;
+
                         Debug.WriteLine("Successfully created transaction with Transaction ID: " + response.transactionResponse.transId);
                         Debug.WriteLine("Response Code: " + response.transactionResponse.responseCode);
                         Debug.WriteLine("Message Code: " + response.transactionResponse.messages[0].code);
                         Debug.WriteLine("Description: " + response.transactionResponse.messages[0].description);
                         Debug.WriteLine("Success, Auth Code : " + response.transactionResponse.authCode);
+
+                        context.Logger.Log<string>(Microsoft.Extensions.Logging.LogLevel.Information, new Microsoft.Extensions.Logging.EventId(8788, "CreatePaymentSuccess"), $"{this.Name}  Create federated payment succeeded with Transaction Id: {response.transactionResponse.transId}", null, null);
                     }
                     else
                     {
@@ -122,6 +111,11 @@
                         {
                             Debug.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
                             Debug.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
+                            context.Abort(context.CommerceContext.AddMessage(
+                               context.GetPolicy<KnownResultCodes>().Error,
+                               "CreatePaymentFailed", null,
+                               $"{this.Name}. Create federated payment failed.  Error Code: {response.transactionResponse.errors[0].errorCode}.  Error Message: {response.transactionResponse.errors[0].errorText}."), context);
+
                         }
                     }
                 }
@@ -132,21 +126,32 @@
                     {
                         Debug.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
                         Debug.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
+                        context.Abort(context.CommerceContext.AddMessage(
+                           context.GetPolicy<KnownResultCodes>().Error,
+                           "CreatePaymentFailed", null,
+                           $"{this.Name}. Create federated payment failed.  Error Code: {response.transactionResponse.errors[0].errorCode}.  Error Message: {response.transactionResponse.errors[0].errorText}."), context);
+
                     }
                     else
                     {
                         Debug.WriteLine("Error Code: " + response.messages.message[0].code);
                         Debug.WriteLine("Error message: " + response.messages.message[0].text);
+                        context.Abort(context.CommerceContext.AddMessage(
+                           context.GetPolicy<KnownResultCodes>().Error,
+                           "CreatePaymentFailed", null,
+                           $"{this.Name}. Create federated payment failed.  Error Code: {response.messages.message[0].code}.  Error Message: {response.messages.message[0].text}."), context);
                     }
                 }
             }
             else
             {
-                foreach(var result in controller.GetResults())
+                foreach (var result in controller.GetResults())
                 {
-                    Debug.WriteLine(result);
+                    context.Abort(context.CommerceContext.AddMessage(
+                           context.GetPolicy<KnownResultCodes>().Error,
+                           "CreatePaymentFailed", null,
+                           $"{this.Name}. Create federated payment failed.  Error: {result}"), context);
                 }
-                Debug.WriteLine("Null Response.");
             }
 
             return Task.FromResult(arg);
