@@ -11,14 +11,14 @@ The Authorize.NET plugin is a Sitecore Commerce plugin which is used to itegrate
 4. Add the XCentium.Plugins.Authorize.Net project to the Sitecore.Commerce.Engine references.
 5. Edit the Startup constructor of the Sitecore.Commerce.Engine to set the current directory to the web root path (this is to allow the configuration APIs to work for plugins):
 
-    public Startup(IServiceProvider serviceProvider, IHostingEnvironment hostEnv, ILoggerFactory loggerFactory)
-    {
+       public Startup(IServiceProvider serviceProvider, IHostingEnvironment hostEnv, ILoggerFactory loggerFactory)
+       {
         this._hostEnv = hostEnv;
         this._hostServices = serviceProvider;
 
         Directory.SetCurrentDirectory(this._hostEnv.WebRootPath);
         
         ...
-    }
+        }
  
 6. Integrate the AcceptJS JavaScript into your web application.  For example, see Integrating Accept.js into Your Website (http://developer.authorize.net/api/reference/features/acceptjs.html).
