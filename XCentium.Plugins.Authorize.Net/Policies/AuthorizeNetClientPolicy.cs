@@ -1,13 +1,15 @@
 ﻿namespace XCentium.Plugins.Authorize.Net
 {
+    using Microsoft.Extensions.Configuration;
     using Sitecore.Commerce.Core;
+    using System.Configuration;
 
     public class AuthorizeNetClientPolicy : Policy
     {
         public AuthorizeNetClientPolicy()
         {
-            this.ApiLoginId = "87mzarLWY9T";
-            this.TransactionKey = "352VhB2g322rK7aY";
+            this.ApiLoginId = ConfigureSitecore.Configuration.GetSection("AppSettings:ApiLoginId").Value;
+            this.TransactionKey = ConfigureSitecore.Configuration.GetSection("AppSettings:TransactionKey").Value;
         }
 
         public string ApiLoginId { get; set; }

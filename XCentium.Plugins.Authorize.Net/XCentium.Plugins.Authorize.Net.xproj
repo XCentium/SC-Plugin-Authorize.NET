@@ -1,6 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <PackageId>XCentium.Plugins.Authorize.Net</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Richard Hein</Authors>
+    <Description>Sitecore Commerce Plugin for Authorize.NET AcceptJS payment method.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <Copyright>Copyright 2017 (c) XCentium. All rights reserved.</Copyright>
+    <PackageTags>SitecoreCommerce payments authorize.net</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>

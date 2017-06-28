@@ -1,7 +1,8 @@
 {
-    "version":  "0.0.1",
-    "description":  "Sitecore Commerce Plugin Sample Class Library",
-    "copyright":  "Â© 2017 Sitecore Corporation A/S. All rights reserved. SitecoreÂ® is a registered trademark of Sitecore Corporation A/S.",
+  "title": "Sitecore Commerce Authorize.NET Plugin",
+  "version": "1.0.0",
+  "description": "Sitecore Commerce Authorize.NET Plugin",
+  "copyright": "© 2017 XCentium.  All rights reserved.",
     "authors":  [
                     "Sitecore"
                 ],
@@ -26,7 +27,8 @@
     "AuthorizeNet": "1.9.3",
     "Plugin.Sample.Payments.Braintree": "1.0.2301",
     "Sitecore.Commerce.Core": "1.0.2301",
-    "Sitecore.Commerce.Plugin.Payments": "1.0.2301"
+    "Sitecore.Commerce.Plugin.Payments": "1.0.2301",
+    "System.Configuration.Abstractions": "2.0.2.26"
   },
     "frameworks":  {
                        "net452":  {
