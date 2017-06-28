@@ -21,3 +21,4 @@ The Authorize.NET plugin is a Sitecore Commerce plugin which is used to itegrate
         ...
     }
  
+6. Integrate the AcceptJS JavaScript into your web application.  For example, see Integrating Accept.js into Your Website (http://developer.authorize.net/api/reference/features/acceptjs.html).
